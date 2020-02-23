@@ -16,15 +16,7 @@ const todos = [
 ];
 
 const server = http.createServer((req, res) => {
-  //   res.statusCode = 404;
-  //   res.setHeader("Content-Type", "application/json");
-  //   res.setHeader("X-Powered-By", "Node.js");
-
-  res.writeHead(200, {
-    "Content-Type": "application/json",
-    "X-Powered-By": "Node.js"
-  });
-
+  const { method, url } = req;
   let body = [];
   req
     .on("data", chunck => {
@@ -32,15 +24,32 @@ const server = http.createServer((req, res) => {
     })
     .on("end", () => {
       body = Buffer.concat(body).toString();
-      console.log(body);
-    });
 
-  res.end(
-    JSON.stringify({
-      success: true,
-      data: todos
-    })
-  );
+      let status = 404;
+      const response = {
+        success: false,
+        data: null
+      };
+
+      if (method === "GET" && url === "/todos") {
+        status = 200;
+        response.success = true;
+        response.data = todos;
+      } else if (method === "POST" && url === "/todos") {
+        const { id, text } = JSON.parse(body);
+
+        todos.push({ id, text });
+        status = 201;
+        response.success = true;
+        response.data = todos;
+      }
+
+      res.writeHead(status, {
+        "Content-Type": "application/json",
+        "X-Powered-By": "Node.js"
+      });
+      res.end(JSON.stringify(response));
+    });
 });
 
 const PORT = 5000;
