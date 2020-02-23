@@ -28,7 +28,8 @@ const server = http.createServer((req, res) => {
       let status = 404;
       const response = {
         success: false,
-        data: null
+        data: null,
+        error: null
       };
 
       if (method === "GET" && url === "/todos") {
@@ -38,10 +39,14 @@ const server = http.createServer((req, res) => {
       } else if (method === "POST" && url === "/todos") {
         const { id, text } = JSON.parse(body);
 
-        todos.push({ id, text });
-        status = 201;
-        response.success = true;
-        response.data = todos;
+        if (!id || !text) {
+          status: 404, (response.error = "Please add id and text");
+        } else {
+          todos.push({ id, text });
+          status = 201;
+          response.success = true;
+          response.data = todos;
+        }
       }
 
       res.writeHead(status, {
