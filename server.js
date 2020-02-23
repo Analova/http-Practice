@@ -20,15 +20,25 @@ const server = http.createServer((req, res) => {
   //   res.setHeader("Content-Type", "application/json");
   //   res.setHeader("X-Powered-By", "Node.js");
 
-  res.writeHead(404, {
+  res.writeHead(200, {
     "Content-Type": "application/json",
     "X-Powered-By": "Node.js"
   });
+
+  let body = [];
+  req
+    .on("data", chunck => {
+      body.push(chunck);
+    })
+    .on("end", () => {
+      body = Buffer.concat(body).toString();
+      console.log(body);
+    });
+
   res.end(
     JSON.stringify({
-      success: false,
-      error: "Not found!",
-      data: null
+      success: true,
+      data: todos
     })
   );
 });
